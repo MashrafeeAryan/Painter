@@ -1,3 +1,4 @@
+from math import sqrt
 import os
 
 import numpy as np
@@ -9,6 +10,7 @@ import mediapipe as mp
 video = cv2.VideoCapture(0)
 
 mp_drawing = mp.solutions.drawing_utils
+
 hands = mp.solutions.hands.Hands()
 canvas = np.ones((480, 640, 3), dtype=np.uint8) * 255
 cv2.imshow("Canvas", canvas)
@@ -20,6 +22,11 @@ while True:
     landmark = hands.process(rgb_frame)
     if landmark.multi_hand_landmarks:
         for hand in landmark.multi_hand_landmarks:
+            mp_drawing.draw_landmarks(
+                flipped_frame,
+                hand, 
+                mp.solutions.hands.HAND_CONNECTIONS
+            )
             index_tip = hand.landmark[8]
             thumb_tip = hand.landmark[4]
             
@@ -28,10 +35,8 @@ while True:
             
             index_x = int(index_tip.x * 640)
             index_y = int(index_tip.y * 480)
-            prev_x, prev_y = index_x, index_y
 
-            if (index_y - thumb_y) < 2:                
-                if prev_x is not None and prev_y is not None:
+            if sqrt((index_x - thumb_x)**2 + (index_y - thumb_y)**2) < 5:                
                     cv2.line(canvas, (prev_x, prev_y), (index_x, index_y), (0,255,0), thickness=3)
                     prev_x, prev_y = index_x, index_y
 
