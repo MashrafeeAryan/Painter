@@ -5,10 +5,10 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # 0 = all logs, 1 = info, 2 = warning,
 
 import cv2
 import mediapipe as mp
+
 video = cv2.VideoCapture(0)
 
-is_drawing = False
-
+mp_drawing = mp.solutions.drawing_utils
 hands = mp.solutions.hands.Hands()
 canvas = np.ones((480, 640, 3), dtype=np.uint8) * 255
 cv2.imshow("Canvas", canvas)
@@ -28,13 +28,13 @@ while True:
             
             index_x = int(index_tip.x * 640)
             index_y = int(index_tip.y * 480)
-            
-            if (index_y - thumb_y) < 5:                
-                prev_x, prev_y = index_x, index_y
-                
+            prev_x, prev_y = index_x, index_y
+
+            if (index_y - thumb_y) < 2:                
                 if prev_x is not None and prev_y is not None:
                     cv2.line(canvas, (prev_x, prev_y), (index_x, index_y), (0,255,0), thickness=3)
-            
+                    prev_x, prev_y = index_x, index_y
+
     else:
         print("No Hands")
         prev_x, prev_y = None, None
